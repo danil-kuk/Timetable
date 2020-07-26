@@ -1,0 +1,78 @@
+﻿@model IEnumerable<IzhCloud_Timetable.Models.Entities.Day>
+@{
+    var culture = new System.Globalization.CultureInfo("ru-RU");
+}
+
+<div class="text-center">
+    <h2>Расписание работы</h2>
+</div>
+@if (TempData["mode"]?.ToString() == "edit")
+{
+    <form asp-action="Save" method="post">
+        <input type="submit" value="Сохранить изменения" />
+        @{
+            var today = DateTime.Today;
+            for (int i = 0; i < 10; i++)
+            {
+                var day = today.AddDays(i);
+                var dayName = culture.DateTimeFormat.GetDayName(day.DayOfWeek);
+                dayName = char.ToUpper(dayName[0]) + dayName.Substring(1);
+                var dbEntry = Model?.Where(m => m.Date.Date == day.Date).FirstOrDefault();
+                <div class="day-@i">
+                    <h5>@day.ToString("dd MMMM yyyy", culture), @dayName</h5>
+                    <div class="flex-row d-flex justify-content-center flex-wrap">
+                        <div class="d-flex block justify-content-center align-items-center">
+                            <input type="time" value="@dbEntry?.FirstFirst" name="data" /> - <input type="time" value="@dbEntry?.FirstSecond" name="data" />
+                        </div>
+                        <div class="d-flex block justify-content-center align-items-center">
+                            <input type="time" value="@dbEntry?.SecondFirst" name="data" /> - <input type="time" value="@dbEntry?.SecondSecond" name="data" />
+                        </div>
+                        <div class="separator"></div>
+                        <div class="d-flex block justify-content-center align-items-center">
+                            <input type="time" value="@dbEntry?.ThirdFirst" name="data" /> - <input type="time" value="@dbEntry?.ThirdSecond" name="data" />
+                        </div>
+                        <div class="d-flex block justify-content-center align-items-center">
+                            <input type="time" value="@dbEntry?.FourthFirst" name="data" /> - <input type="time" value="@dbEntry?.FourthSecond" name="data" />
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+    </form>
+}
+else
+{
+    <a asp-action="Edit">Редактировать</a>
+
+    // Цикл для недели
+    var today = DateTime.Today;
+    for (int i = 0; i < 10; i++)
+    {
+        var day = today.AddDays(i);
+        var dayName = culture.DateTimeFormat.GetDayName(day.DayOfWeek);
+        dayName = char.ToUpper(dayName[0]) + dayName.Substring(1);
+        var dbEntry = Model?.Where(m => m.Date.Date == day.Date).FirstOrDefault();
+        var redColor1 = @dbEntry?.FirstFirst == null || @dbEntry?.FirstSecond == null ? "#000" : "#ff0000";
+        var redColor2 = @dbEntry?.ThirdFirst == null || @dbEntry?.ThirdSecond == null ? "#000" : "#ff0000";
+        var yellowColor1 = @dbEntry?.SecondFirst == null || @dbEntry?.SecondSecond == null ? "#000" : "#ffdd00";
+        var yellowColor2 = @dbEntry?.FourthFirst == null || @dbEntry?.FourthSecond == null ? "#000" : "#ffdd00";
+        <div class="day-@i">
+            <h5>@day.ToString("dd MMMM yyyy", culture), @dayName</h5>
+            <div class="flex-row d-flex justify-content-center flex-wrap">
+                <div class="d-flex block justify-content-center align-items-center" style="border-color: @redColor1">
+                    @dbEntry?.FirstFirst - @dbEntry?.FirstSecond
+                </div>
+                <div class="d-flex block justify-content-center align-items-center" style="border-color: @yellowColor1">
+                    @dbEntry?.SecondFirst - @dbEntry?.SecondSecond
+                </div>
+                <div class="separator"></div>
+                <div class="d-flex block justify-content-center align-items-center" style="border-color: @redColor2">
+                    @dbEntry?.ThirdFirst - @dbEntry?.ThirdSecond
+                </div>
+                <div class="d-flex block justify-content-center align-items-center" style="border-color: @yellowColor2">
+                    @dbEntry?.FourthFirst - @dbEntry?.FourthSecond
+                </div>
+            </div>
+        </div>
+    }
+}
